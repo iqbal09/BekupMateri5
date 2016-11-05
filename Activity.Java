@@ -12,6 +12,7 @@ import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.nongkrong.medan.setget.Nongkrong;
 
@@ -28,6 +29,7 @@ import org.json.JSONObject;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Map;
+import java.util.StringTokenizer;
 
 public class MapsActivity extends FragmentActivity implements OnMapReadyCallback {
 
@@ -35,19 +37,22 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
     ArrayList<Nongkrong> nongkrongList;
 
+    String k = "";
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_maps);
 
+
         nongkrongList = new ArrayList<Nongkrong>();
         new JSONAsyncTask().execute("http://10.10.10.15/nongkrong/list_tempat.php");
-
 
         // Obtain the SupportMapFragment and get notified when the map is ready to be used.
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
+
 
 
 
@@ -99,6 +104,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                         Nongkrong nongkrong = new Nongkrong();
                         nongkrong.setId(object.getString("id_db"));
                         nongkrong.setNama(object.getString("nama"));
+                        k += String.valueOf(object.getString("nama") + "|");
                         System.out.println("Nama" + object.getString("nama"));
                         nongkrong.setTempat(object.getString("koordinat"));
                         System.out.println("Koordinat" + object.getString("koordinat"));
@@ -142,14 +148,39 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
 
+
+//        System.out.println("Ukuran List" + nongkrongList.size() );
+//
+//        System.out.println("Nama Tempat"+ k);
+
+        //Traversing through the whole list to get all the names
+        for (int i = 0; i < nongkrongList.size(); i++) {
+            //Storing names to string array
+
+            String id = String.valueOf(nongkrongList.get(i).getId());
+            String nama = String.valueOf(nongkrongList.get(i).getNama());
+            String tempat = String.valueOf(nongkrongList.get(i).getTempat());
+
+            String[] output = tempat.split(",");
+            Double lati = Double.parseDouble(output[0]);
+            Double logi = Double.parseDouble(output[1]);
+
+            LatLng kodinat = new LatLng(lati, logi);
+            mMap.addMarker(new MarkerOptions().position(kodinat).title(nama));
+
+
+        }
+
         // Add a marker in Sydney and move the camera
-        LatLng paladium     = new LatLng(3.5901067,98.6715549);
-        LatLng sun          = new LatLng(3.5824921,98.66948);
-        LatLng centerpoint  = new LatLng(3.5920321,98.6787132);
+        LatLng paladium = new LatLng(3.5901067, 98.6715549);
+        LatLng sun = new LatLng(3.5824921, 98.66948);
+        LatLng centerpoint = new LatLng(3.5920321, 98.6787132);
         mMap.addMarker(new MarkerOptions().position(paladium).title("Paladium"));
         mMap.addMarker(new MarkerOptions().position(centerpoint).title("Center Point"));
         mMap.addMarker(new MarkerOptions().position(sun).title("Sun"));
         //mMap.moveCamera(CameraUpdateFactory.newLatLng(sun));
-        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(sun,15));
+        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(sun, 15));
+
+       
     }
 }
