@@ -8,6 +8,10 @@ public class Nongkrong {
     private String id;
     private String nama;
     private String tempat;
+    
+   public Nongkrong() {
+       
+    }
 
     public Nongkrong(String id, String nama, String tempat) {
         this.id = id;
